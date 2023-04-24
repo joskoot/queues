@@ -2,5 +2,5 @@
 
 ; By Jacob J. A. Koot
 
-(define scribblings '(("manual-scrbl" ())))
+(define scribblings '(("manual.scrbl" ())))
 (define collection "queues")
