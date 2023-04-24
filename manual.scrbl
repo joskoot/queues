@@ -14,6 +14,7 @@
 
 @title[#:version ""]{Queue}
 @author{Jacob J. A. Koot}
+@;@(defmodule "queue.rkt" #:packages ())
 @(defmodule queues/queue #:packages ())
 
 @section{Introduction}
@@ -90,14 +91,22 @@ The procedures are described in order of their names.
 
  @red{Caveat}: Results can be surprising when an imperative queue procedure is applied to the
  @nbr[‹queue›] in other for-clauses or in the body of a @nbr[for] loop.
- The following writes symbol @green{@tt{a}} followed by an infinite number of
- symbol @green{@tt{b}}:
+ The following would write symbol @green{@tt{a}} followed by an infinite number of
+ symbol @green{@tt{b}} if the thread were not killed.
 
- @racketblock[
+ @Interaction[
  (define q (make-queue 'a))
- (for ((e (in-queue q)))
-   (queue-put! q 'b)
-   (write e))]}
+ (define p (open-output-string))
+ (define thrd
+   (thread
+     (λ ()
+       (for ((e (in-queue! q)))
+         (queue-put! q 'b)
+         (write e p)))))
+ (sleep 1)
+ (kill-thread thrd)
+ (flush-output p)
+ (string-length (get-output-string p))]}
 
 @defproc[(in-queue! (‹queue› queue?)) (or/c list? sequence?)]{
  Same as @nbr[in-queue], but removes each visited element from the @nbr[‹queue›].@(lb)
@@ -143,24 +152,7 @@ The procedures are described in order of their names.
  (code:comment #,(black "Whereas with " @nbr[in-queue!] ":"))
  (code:comment " ")
  (for/list ((a (in-queue! q)) (b (in-queue! q))) (list a b))
- (queue-length q)]
-
- The following would write symbol @green{@tt{a}} followed by an infinite number of
- symbol @green{@tt{b}} if the thread were not killed.
-
- @Interaction[
- (define q (make-queue 'a))
- (define p (open-output-string))
- (define thrd
-   (thread
-     (λ ()
-       (for ((e (in-queue! q)))
-         (queue-put! q 'b)
-         (write e p)))))
- (sleep 1)
- (kill-thread thrd)
- (flush-output p)
- (string-length (get-output-string p))]}
+ (queue-length q)]}
 
 @defproc[(list->queue (‹lst› list?)) queue?]{
  Same as @nbr[(apply make-queue ‹lst›)].
