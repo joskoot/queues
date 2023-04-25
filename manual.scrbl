@@ -19,6 +19,7 @@
 
 @section{Introduction}
 
+A queue is a first in first out memory.@(lb)
 Procedure @nbr[make-queue] renders a queue.@(lb)
 Procedure @nbr[queue-put!] mutates a queue by adding an element.@(lb)
 Procedure @nbr[queue-get!] returns the oldest element of a queue@(lb)
@@ -60,11 +61,12 @@ Removing an element from a queue effectively decreases the indices of all
 newer elements by one. Indexed access takes time proportional to the index.
 
 @Interaction[
+ (queue-print-content 'yes)
  (define q (list->queue '(a b c d)))
  (queue-ref q 1)
- (queue->list q)
+ q
  (queue-remove! q 1)
- (queue->list q)
+ q
  (code:line (queue-ref q 1) (code:comment #,(red "Not the same as before!")))]
 
 @section[#:tag "procedures"]{Procedures}
@@ -83,10 +85,12 @@ The procedures are described in order of their names.
  @Interaction[
  (define a (make-queue 1 2 3))
  (define b (make-queue 'a 'b))
+ (queue-print-content #t)
+ (list a b)
  (for* ((a a) (b b)) (writeln (list a b)))
  (code:comment "Works, but the following is faster:")
  (for* ((a (in-queue a)) (b (in-queue b))) (writeln (list a b)))
- (queue-print-mode #t)
+ (code:comment #,(list (nbr in-queue) " does no mutation."))
  (list a b)]
 
  @red{Caveat}: Results can be surprising when an imperative queue procedure is applied to the
@@ -114,9 +118,10 @@ The procedures are described in order of their names.
 
  @Interaction[
  (define q (make-queue 1 2 3 4 5))
- (for/list ((x (in-queue! q))) x)
- (code:comment "in-queue! clears the queue.")
- (queue-empty? q)]
+ (for/list ((k (in-range 3)) (x (in-queue! q))) x)
+ (code:comment #,(list (nbr in-queue!) " mutates the queue."))
+ (queue-print-content 'yes)                  
+ q]
 
  @Interaction[
  (in-queue! (make-queue))]
@@ -129,7 +134,7 @@ The procedures are described in order of their names.
  because after the first iteration through the queue, the latter will be empty.
 
  @Interaction[
- (queue-print-mode #t)
+ (queue-print-content #t)
  (define q (make-queue 'a 'b 'c))
  (for* ((i (in-range 100)) (e (in-queue! q)))
    (writeln (list i e (queue->list q))))]
@@ -188,7 +193,7 @@ The procedures are described in order of their names.
  (define c (queue-copy q))
  (queue-remove! q 2)
  (queue-remove! c 3)
- (queue-print-mode #t)
+ (queue-print-content #t)
  q
  c
  ]}
@@ -202,14 +207,16 @@ The procedures are described in order of their names.
  then procedure @nbr[queue-filter] takes time proportional to the length of the @nbr[‹queue›].}
 
 @defproc*[(((queue-get! (‹queue› queue?)) any/c)
-           ((queue-get! (‹queue› queue?) (‹escape› any/c)) any/c))]{
+           ((queue-get! (‹queue› queue?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
  Returns the first element of the @nbr[‹queue›] and removes it.
  Constant time.@(lb)
  If the @nbr[‹queue›] is empty, the result depends on @nbr[‹escape›].@(lb)
  @(hspace 2)If it is not present, an exception is raised.@(lb)
  @(hspace 2)If it is a procedure whose arity includes 0,
  this procedure is called at tail position.@(lb)
- @(hspace 2)If it is a not a procedure or does not include arity 0, @nbr[‹escape›] is returned.
+ @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
+ @(hspace 2)Else an exception is raised.
 
  @Interaction*[
  (queue-get! (make-queue 'a))
@@ -218,9 +225,11 @@ The procedures are described in order of their names.
  (queue-get! empty-queue (λ () (displayln "empty queue")))
  (queue-get! empty-queue)]
 
- A procedure not including arity 0 is not called as an escape procedure.
+ An escape procedure not including arity 0 yields an exception,@(lb)
+ but the arity is checked only if the queue is empty:
 
  @Interaction*[
+ (queue-get! (make-queue 'a) (λ (x) x))
  (queue-get! empty-queue (λ (x) x))]
 
  A removed element becomes garbage collectable if no longer accessible otherwise:
@@ -242,19 +251,21 @@ The procedures are described in order of their names.
  then procedure @nbr[queue-map] takes time proportional to the length of the @nbr[‹queue›].}
 
 @defproc*[(((queue-peek (‹queue› queue?)) any/c)
-           ((queue-peek (‹queue› queue?) (‹escape› any/c)) any/c))]{
+           ((queue-peek (‹queue› queue?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
  Returns the first element of the @nbr[‹queue›] without removing it.
  Constant time.@(lb)
  If the @nbr[‹queue›] is empty, the result depends on @nbr[‹escape›].@(lb)
  @(hspace 2)If it is not present, an exception is raised.@(lb)
  @(hspace 2)If it is a procedure whose arity includes 0,
  this procedure is called at tail position.@(lb)
- @(hspace 2)If it is a not a procedure or does not include arity 0, @nbr[‹escape›] is returned.}
+ @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
+ @(hspace 2)Else an exception is raised.}
 
-@defparam*[queue-print-mode ‹yes/no› any/c boolean? #:value #f]{
+@defparam*[queue-print-content ‹yes/no› any/c boolean? #:value #f]{
  If @nbr[‹yes/no›] is anything else than @nbr[#f],
  the parameter is set to @nbr[#t].
- Queues are opaque objects, but parameter @nbr[queue-print-mode]
+ Queues are opaque objects, but parameter @nbr[queue-print-content]
  can be used to choose the way a queue is printed.
  If the parameter is false, a queue is printed as
  @inset{@nb{@tt{#<queue:@itt{‹length›>}}}}
@@ -263,8 +274,8 @@ The procedures are described in order of their names.
 
  @Interaction[
  (define q (make-queue 'a 'b 'c))
- (parameterize ((queue-print-mode #f)) (writeln q))
- (parameterize ((queue-print-mode #t)) (writeln q))]}
+ (parameterize ((queue-print-content #f)) (writeln q))
+ (parameterize ((queue-print-content #t)) (writeln q))]}
 
 @defproc[(queue-put! (‹queue› queue?) (‹obj› any/c)) void?]{
  Adds the @nbr[‹obj›] as the last one in the @nbr[‹queue›].
@@ -287,7 +298,8 @@ The procedures are described in order of their names.
  (queue->list q)]}
 
 @defproc*[(((queue-ref (‹queue› queue?) (‹n› natural?)) any/c)
-           ((queue-ref (‹queue› queue?) (‹n› natural?) (‹escape› any/c)) any/c))]{
+           ((queue-ref (‹queue› queue?) (‹n› natural?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
  Returns the @nbr[‹n›]@superscript{th} element of the @nbr[‹queue›]
  without removing it.
  Time proportional to @nbr[‹n›].@(lb)
@@ -297,10 +309,12 @@ The procedures are described in order of their names.
  @(hspace 2)If it is not present, an exception is raised.@(lb)
  @(hspace 2)If it is a procedure whose arity includes 0,
  this procedure is called at tail position.@(lb)
- @(hspace 2)If it is a not a procedure or does not include arity 0, @nbr[‹escape›] is returned.}
+ @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
+ @(hspace 2)Else an exception is raised.}
 
 @defproc*[(((queue-remove! (‹queue› queue?) (‹n› natural?)) any/c)
-           ((queue-remove! (‹queue› queue?) (‹n› natural?) (‹escape› any/c)) any/c))]{
+           ((queue-remove! (‹queue› queue?) (‹n› natural?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
  Like @nbr[queue-ref], but also removes the referenced element from the @nbr[‹queue›].@(lb)
  Time proportional to @nbr[‹n›].}
 
@@ -369,7 +383,7 @@ but this makes no sense:
 @Interaction[
  (define recursive-q (make-queue))
  (queue-put! recursive-q recursive-q)
- (queue-print-mode 'yes)
+ (queue-print-content 'yes)
  recursive-q
  (queue-peek recursive-q)
  (eq? recursive-q (queue-peek recursive-q))

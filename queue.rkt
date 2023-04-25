@@ -22,7 +22,7 @@ Make this documentation with file manual.scrbl.
   queue-length
   queue-map
   queue-peek
-  queue-print-mode
+  queue-print-content
   queue-put!
   queue-put!*
   queue-ref
@@ -40,11 +40,11 @@ Make this documentation with file manual.scrbl.
 ; For an empty queue length is zero and mlist and pointer are null.
 
 (define (queue-printer q p m)
-  (if (queue-print-mode)
+  (if (queue-print-content)
     (fprintf p "#<queue:~s:~s>" (queue-length q) (queue-mlist q))
     (fprintf p "#<queue:~s>" (queue-length q))))
 
-(define queue-print-mode (make-parameter #f (λ (x) (and x #t)) 'queue-print-mode))
+(define queue-print-content (make-parameter #f (λ (x) (and x #t)) 'queue-print-content))
 
 (struct queue (length (mlist #:auto) (pointer #:auto))
   #:mutable
@@ -63,7 +63,10 @@ Make this documentation with file manual.scrbl.
 (define (queue-empty-error who escape)
   (cond
     ((eq? escape no-escape) (error who "empty queue"))
-    ((and (procedure? escape) (procedure-arity-includes? escape 0)) (escape))
+    ((procedure? escape)
+     (cond
+       ((procedure-arity-includes? escape 0) (escape))
+       (else (raise-argument-error who "(procedure-arity-includes/c 0)" escape))))
     (else escape)))
 
 (define (index-out-of-range escape who index length)
