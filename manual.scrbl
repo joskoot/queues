@@ -12,7 +12,7 @@
    (for-template "queue.rkt" racket)
    (for-syntax racket))
 
-@title[#:version ""]{Queue}
+@title[#:version ""]{Queues}
 @author{Jacob J. A. Koot}
 @;@(defmodule "queue.rkt" #:packages ())
 @(defmodule queues/queue #:packages ())
