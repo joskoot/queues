@@ -15,7 +15,7 @@
 @title[#:version ""]{Queues}
 @author{Jacob J. A. Koot}
 @;@(defmodule "queues.rkt" #:packages ())
-@(defmodule queues/queue #:packages ())
+@(defmodule queues/queues #:packages ())
 
 @section{Introduction}
 
