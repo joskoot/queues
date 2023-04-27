@@ -6,15 +6,15 @@
    scribble/core
    scribble/eval   
    racket
-   "queue.rkt"
+   "queues.rkt"
    "srcribble-utensils.rkt"
-   (for-label "queue.rkt" racket)
-   (for-template "queue.rkt" racket)
+   (for-label "queues.rkt" racket)
+   (for-template "queues.rkt" racket)
    (for-syntax racket))
 
 @title[#:version ""]{Queues}
 @author{Jacob J. A. Koot}
-@;@(defmodule "queue.rkt" #:packages ())
+@;@(defmodule "queues.rkt" #:packages ())
 @(defmodule queues/queue #:packages ())
 
 @section{Introduction}
@@ -71,7 +71,8 @@ newer elements by one. Indexed access takes time proportional to the index.
 
 @section[#:tag "procedures"]{Procedures}
 
-Module @hyperlink["../../queue.rkt"]{queues} provides procedures only, no syntaxes or other types of objects.
+Module @hyperlink["../../queues.rkt"]{queues.rkt} provides procedures only,
+no syntaxes or other types of objects.
 @nb{Where applicable}, the description of a procedure includes a statement about the time it takes.
 A procedure whose name ends with an exclamation mark mutates a queue.
 @nb{An exclamation} mark not necessarily implies that the procedure returns @(Void).@(lb)

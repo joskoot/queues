@@ -6,9 +6,9 @@
    scribble/core
    scribble/eval
    racket
-   "queue.rkt"
-   (for-label "queue.rkt" racket)
-   (for-template "queue.rkt" racket)
+   "queues.rkt"
+   (for-label "queues.rkt" racket)
+   (for-template "queues.rkt" racket)
    (for-syntax racket))
 
 @(provide (all-defined-out))
@@ -24,7 +24,7 @@
    (interaction
      #:eval
      (make-base-eval #:pretty-print? #f
-       #:lang '(begin (require racket "queue.rkt")
+       #:lang '(begin (require racket "queues.rkt")
                  (begin-for-syntax
                    (print-reader-abbreviations #f)
                    (print-as-expression #f))
@@ -38,7 +38,7 @@
 
 @(define (make-evaller)
    (make-base-eval #:pretty-print? #f
-     #:lang '(begin (require racket "queue.rkt")
+     #:lang '(begin (require racket "queues.rkt")
                (begin-for-syntax
                  (print-reader-abbreviations #f)
                  (print-as-expression #f))
