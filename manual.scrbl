@@ -12,6 +12,19 @@
    (for-template "queues.rkt" racket)
    (for-syntax racket))
 
+@(define-for-syntax local #t)
+
+@(define-syntax (nbhll stx)
+  (syntax-case stx ()
+   ((_ x y ...)
+    (if local
+   #'(nb (hyperlink x y ...))
+   #'(nb (hyperlink (string-append "../../" x) y ...))))))
+
+@(define-syntax (Defmodule stx)
+  (if local #'(defmodule "queues.rkt" #:packages ())
+            #'(defmodule queues/queues #:packages ())))
+
 @title[#:version ""]{Queues}
 @author{Jacob J. A. Koot}
 @(Defmodule)
