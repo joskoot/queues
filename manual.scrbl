@@ -14,8 +14,7 @@
 
 @title[#:version ""]{Queues}
 @author{Jacob J. A. Koot}
-@;@(defmodule "queues.rkt" #:packages ())
-@(defmodule queues/queues #:packages ())
+@(Defmodule)
 
 @section{Introduction}
 
@@ -71,7 +70,7 @@ newer elements by one. Indexed access takes time proportional to the index.
 
 @section[#:tag "procedures"]{Procedures}
 
-Module @hyperlink["../../queues.rkt"]{queues.rkt} provides procedures only,
+Module @nbhll["queues.rkt"]{queues.rkt} provides procedures only,
 no syntaxes or other types of objects.
 @nb{Where applicable}, the description of a procedure includes a statement about the time it takes.
 A procedure whose name ends with an exclamation mark mutates a queue.
