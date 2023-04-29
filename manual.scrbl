@@ -12,7 +12,7 @@
    (for-template "queues.rkt" racket)
    (for-syntax racket))
 
-@(define-for-syntax local #f)
+@(define-for-syntax local #t)
 
 @(define-syntax (nbhll stx)
   (syntax-case stx ()
@@ -145,7 +145,7 @@ The procedures are described in order of their names.
  @nbr[‹queue›] in other for-clauses or in the body of a @nbr[for] loop.
  In each cycle of the for loop the current element is removed from the @nbr[‹queue›].
  @nb{Use procedure} @nbr[in-queue] for non destructive traversal through the queue.
- In the following example variable @tt{i} assumes value 0 only,
+ In the following example variable @tt{i} seems to assume value 0 only,
  because after the first iteration through the queue, the latter will be empty.
 
  @Interaction[
