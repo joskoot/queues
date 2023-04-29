@@ -12,7 +12,7 @@
    (for-template "queues.rkt" racket)
    (for-syntax racket))
 
-@(define-for-syntax local #f)
+@(define-for-syntax local #t)
 
 @(define-syntax (nbhll stx)
   (syntax-case stx ()
@@ -211,7 +211,19 @@ The procedures are described in order of their names.
  (queue-print-content #t)
  q
  c
- ]}
+ ]
+
+The elements in the copy are the same as in the original (in the sence of @nbr[eq?]).
+Therefore, mutation of a mutable element of the @nbr[‹queue›] affects both
+the original and the copy:
+
+@Interaction[
+ (define b (box 'aap))
+ (define q (make-queue b))
+ (define c (queue-copy q))
+ (set-box! b 'noot)
+ (queue-get! q)
+ (queue-get! c)]}
 
 @defproc[(queue-empty? (‹queue› queue?)) boolean?]{Constant time.}
 
