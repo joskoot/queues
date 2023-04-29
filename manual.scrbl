@@ -213,7 +213,7 @@ The procedures are described in order of their names.
  c
  ]
 
-The elements in the copy are the same as in the original (in the sence of @nbr[eq?]).
+The elements in the copy are the same as in the original in the sence of @nbr[eq?].
 Therefore, mutation of a mutable element of the @nbr[‹queue›] affects both
 the original and the copy:
 
