@@ -32,8 +32,8 @@
 @section{Introduction}
 
 A queue is a first in first out memory.@(lb)
-The elements are in a row, one after another,
-just like in a proper list.@(lb)
+The elements are in a row, one after another,@(lb)
+just like well-bred people do at a bus stop.@(lb)
 Procedure @nbr[make-queue] renders a queue.@(lb)
 Procedure @nbr[queue-put!] mutates a queue by adding an element at the end.@(lb)
 Procedure @nbr[queue-get!] returns the first element of a queue@(lb)
