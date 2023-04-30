@@ -67,11 +67,11 @@ Both operations take constant time,
 independently of the length of the queue and the size of the data.
 
 No indices are required to enter or retrieve elements,
-but as the elements have time order,
+but as the elements have a well defined order,
 indexed access is posible too.
 The elements are indexed by natural numbers in the same way the elements of a list or vector
 are indexed for procedure @nbr[list-ref] or @nbr[vector-ref].
-The oldest element has index zero.
+The oldest/first element has index zero.
 Removing an element from a queue effectively decreases the indices of all
 newer elements by one. Indexed access takes time proportional to the index.
 
