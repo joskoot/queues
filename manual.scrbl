@@ -32,7 +32,7 @@
 @section{Introduction}
 
 A queue is a first in first out memory.
-The elements are added one after another,
+The elements are added one after another,@(lb)
 just like well-bred people put themselves as last one at the end of a queue at @nb{a bus} stop.
 @nb{An element} is extracted just like the first person of a queue enters the bus.@(lb)
 Procedure @nbr[make-queue] renders @nb{a queue}.@(lb)
