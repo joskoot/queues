@@ -2,7 +2,6 @@
 Queues implemented by structs with a mutable list
 
 Queue tools also are provided by (require data/queue)
-
 The module presented in the present repository is very much alike,
 but uses structs containing containing a mutable list plus two other fields:
 the length of the mutable list and a pointer to the last element.
