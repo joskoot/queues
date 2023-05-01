@@ -15,15 +15,15 @@
 @(define-for-syntax local #f)
 
 @(define-syntax (nbhll stx)
-  (syntax-case stx ()
-   ((_ x y ...)
-    (if local
-   #'(nb (hyperlink x y ...))
-   #'(nb (hyperlink (string-append "../../" x) y ...))))))
+   (syntax-case stx ()
+     ((_ x y ...)
+      (if local
+        #'(nb (hyperlink x y ...))
+        #'(nb (hyperlink (string-append "../../" x) y ...))))))
 
 @(define-syntax (Defmodule stx)
-  (if local #'(defmodule "queues.rkt" #:packages ())
-            #'(defmodule queues/queues #:packages ())))
+   (if local #'(defmodule "queues.rkt" #:packages ())
+     #'(defmodule queues/queues #:packages ())))
 
 @title[#:version ""]{Queues}
 @author{Jacob J. A. Koot}
@@ -33,11 +33,11 @@
 
 A queue is a first in first out memory.
 The elements are added one after another,@(lb)
-just like well-bred people put themselves as last one at the end of a queue at @nb{a bus} stop.
-@nb{An element} is extracted just like the first person of a queue enters the bus.@(lb)
-Procedure @nbr[make-queue] renders @nb{a queue}.@(lb)
-Procedure @nbr[queue-put!] mutates @nb{a queue} by adding an element as the last one at the end.@(lb)
-Procedure @nbr[queue-get!] returns the first element of @nb{a queue}
+just like well-bred people put themselves at the end of a queue at a bus stop.@(lb)
+An element is extracted just like the first person in a queue enters the bus.@(lb)
+Procedure @nbr[make-queue] renders a queue.@(lb)
+Procedure @nbr[queue-put!] mutates a queue by adding an element at the end.@(lb)
+Procedure @nbr[queue-get!] returns the first element of a queue@(lb)
 and mutates the queue by removing this element.
 
 @Interaction[
@@ -67,11 +67,11 @@ Both operations take constant time,
 independently of the length of the queue and the size of the data.
 
 No indices are required to enter or retrieve elements,
-but as the elements have a well defined order,
+but as the elements have time order,
 indexed access is posible too.
 The elements are indexed by natural numbers in the same way the elements of a list or vector
 are indexed for procedure @nbr[list-ref] or @nbr[vector-ref].
-The oldest/first element has index zero.
+The oldest element has index zero.
 Removing an element from a queue effectively decreases the indices of all
 newer elements by one. Indexed access takes time proportional to the index.
 
@@ -91,7 +91,194 @@ no syntaxes or other types of objects.
 @nb{Where applicable}, the description of a procedure includes a statement about the time it takes.
 A procedure whose name ends with an exclamation mark mutates a queue.
 @nb{An exclamation} mark not necessarily implies that the procedure returns @(Void).@(lb)
-The procedures are described in order of their names.
+
+@defproc[(queue? (‹obj› any/c)) boolean?]{Constant time.}
+
+@defproc[(queue-empty? (‹queue› queue?)) boolean?]{Constant time.}
+
+@defparam*[queue-print-content ‹yes/no› any/c boolean? #:value #f]{
+ If @nbr[‹yes/no›] is anything else than @nbr[#f],
+ the parameter is set to @nbr[#t].
+ Queues are opaque objects, but parameter @nbr[queue-print-content]
+ can be used to choose the way a queue is printed.
+ If the parameter is false, a queue is printed as
+ @inset{@nb{@tt{#<queue:@itt{‹length›>}}}}
+ else as
+ @inset{@nb{@tt{#<queue:@itt{‹length›}:@(string #\{)@itt{‹element›} ...@(string #\})>}}}
+
+ @Interaction[
+ (define q (make-queue 'a 'b 'c))
+ (parameterize ((queue-print-content #f)) (writeln q))
+ (parameterize ((queue-print-content #t)) (writeln q))]}
+
+@defproc[(queue-clear! (‹queue› queue?)) void?]{
+ Empties the @nbr[‹queue›]. Fixed time.}
+
+@defproc[(queue-length (‹queue› queue?)) natural?]{
+ Returns the number of elements currently in the @nbr[‹queue›]. Constant time.}
+
+@defproc[(make-queue (‹obj› any/c) ...) queue?]{
+ Makes a queue containing the @nbr[‹obj›]s in order
+ with the left-most one as the first element
+ and the right-most one the last element.
+ If no @nbr[‹obj›] is given, the returned queue is empty.@(lb)
+ Time proportional to the number of @nbr[‹obj›]s
+ because the list of @nbr[‹obj›]s is transformed to a mutable list.}
+
+@defproc[(queue-put! (‹queue› queue?) (‹obj› any/c)) void?]{
+ Adds the @nbr[‹obj›] as the last one in the @nbr[‹queue›].
+ Constant time.
+
+ @Interaction[
+ (define q (make-queue 'a 'b 'c))
+ (queue-put! q 'aap)
+ (queue->list q)]}
+
+@defproc[(queue-put!* (‹queue› queue?) (‹obj› any/c) ...) void?]{
+ Adds the @nbr[‹obj›]s as the last ones to the @nbr[‹queue›].
+ The right-most @nbr[‹obj›] will be the last element.
+ Time proportional to the number of @nbr[‹obj›]s.
+ The time does not depend on the current @nbrl[queue-length]{length} of the @nbr[‹queue›].
+
+ @Interaction[
+ (define q (make-queue))
+ (queue-put!* q 'a 'b 'c)
+ (queue->list q)]}
+
+@defproc*[(((queue-get! (‹queue› queue?)) any/c)
+           ((queue-get! (‹queue› queue?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
+ Returns the first element of the @nbr[‹queue›] and removes it.
+ Constant time.@(lb)
+ If the @nbr[‹queue›] is empty, the result depends on @nbr[‹escape›].@(lb)
+ @(hspace 2)If it is not present, an exception is raised.@(lb)
+ @(hspace 2)If it is a procedure whose arity includes 0,
+ this procedure is called at tail position.@(lb)
+ @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
+ @(hspace 2)Else an exception is raised.
+
+ @Interaction*[
+ (queue-get! (make-queue 'a))
+ (define empty-queue (make-queue))
+ (queue-get! empty-queue #f)
+ (queue-get! empty-queue (λ () (displayln "empty queue")))
+ (queue-get! empty-queue)]
+
+ An escape procedure not including arity 0 yields an exception,@(lb)
+ but the arity is checked only if the queue is empty:
+
+ @Interaction*[
+ (queue-get! (make-queue 'a) (λ (x) x))
+ (queue-get! empty-queue (λ (x) x))]
+
+ A removed element becomes garbage collectable if no longer accessible otherwise:
+
+ @Interaction[
+ (define b (make-weak-box (list 'aap)))
+ (define q (make-queue (weak-box-value b)))
+ (queue-get! q)
+ (collect-garbage)
+ (weak-box-value b)]}
+
+@defproc*[(((queue-peek (‹queue› queue?)) any/c)
+           ((queue-peek (‹queue› queue?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
+ Returns the first element of the @nbr[‹queue›] without removing it.
+ Constant time.@(lb)
+ If the @nbr[‹queue›] is empty, the result depends on @nbr[‹escape›].@(lb)
+ @(hspace 2)If it is not present, an exception is raised.@(lb)
+ @(hspace 2)If it is a procedure whose arity includes 0,
+ this procedure is called at tail position.@(lb)
+ @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
+ @(hspace 2)Else an exception is raised.}
+
+@defproc*[(((queue-ref (‹queue› queue?) (‹n› natural?)) any/c)
+           ((queue-ref (‹queue› queue?) (‹n› natural?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
+ Returns the @nbr[‹n›]@superscript{th} element of the @nbr[‹queue›]
+ without removing it.
+ Time proportional to @nbr[‹n›].@(lb)
+ Elements are indexed from 0 up to but not including the length of the queue.@(lb)
+ If the @nbr[‹queue›] has less than @nbr[(add1 ‹n›)] elements,
+ the result depends on @nbr[‹escape›].@(lb)
+ @(hspace 2)If it is not present, an exception is raised.@(lb)
+ @(hspace 2)If it is a procedure whose arity includes 0,
+ this procedure is called at tail position.@(lb)
+ @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
+ @(hspace 2)Else an exception is raised.}
+
+@defproc*[(((queue-remove! (‹queue› queue?) (‹n› natural?)) any/c)
+           ((queue-remove! (‹queue› queue?) (‹n› natural?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
+ Like @nbr[queue-ref], but also removes the referenced element from the @nbr[‹queue›].@(lb)
+ Time proportional to @nbr[‹n›].}
+
+@defproc[(queue-push! (‹queue› queue?) (‹obj› any/c)) void?]{
+ Adds the @nbr[‹obj›] as the first one to the @nbr[‹queue›].
+ Can be used together with @nbr[queue-pop!] to use the @nbr[‹queue›] @nb{like a stack}.
+ Constant time.}
+
+@defproc*[(((queue-pop! (‹queue› queue?)) any/c)
+           ((queue-pop! (‹queue› queue?)
+              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
+ Same as @nbr[queue-get!].
+ Can be used together with @nbr[queue-push!] to use the @nbr[‹queue›] @nb{like a stack}.}
+
+@defproc[(list->queue (‹lst› list?)) queue?]{
+ Same as @nbr[(apply make-queue ‹lst›)].
+ Time proportional to the length of the @nbr[‹lst›].}
+
+@defproc[(queue->list (‹queue› queue?)) list?]{
+ Returns a list of the elements of the @nbr[‹queue›] in order from first to last.
+ Time proportional to the @nbrl[queue-length]{length} of the @nbr[‹queue›]
+ because it implies conversion of a mutable list to an immutable one.
+ @ignore{See procedure @nbr[queue->mlist] too.}
+
+ @Interaction[
+ (queue->list (make-queue 1 2 3 4 5))]}
+
+@defproc[(queue-copy (‹queue› queue?)) queue?]{
+ Returns a copy of the @nbr[‹queue›].
+ Mutation of the copy does not affect the original and reversely.
+ Time proportional to the length of the @nbr[‹queue›].
+
+ @Interaction[
+ (define q (make-queue 'a 'b 'c 'd))
+ (define c (queue-copy q))
+ (queue-remove! q 2)
+ (queue-remove! c 3)
+ (queue-print-content #t)
+ q
+ c
+ ]
+ @elemtag{mutable-element}
+ The elements in the copy are the same as in the original in the sence of @nbr[eq?].
+ Therefore, mutation of a mutable element of the @nbr[‹queue›] affects both
+ the original and the copy:
+
+ @Interaction[
+ (define b (box 'aap))
+ (define q (make-queue b))
+ (define c (queue-copy q))
+ (set-box! b 'noot)
+ (queue-get! q)
+ (queue-get! c)]}
+
+@defproc[(queue-filter (‹queue› queue?) (‹pred› (-> any/c any/c))) queue?]{
+ Like @nbr[filter], but applying to queues.
+ Mutation of the returned queue does not affect the original and reversely.
+ If the @nbr[‹pred›] takes constant time,
+ then procedure @nbr[queue-filter] takes time proportional to the length of the @nbr[‹queue›].
+ For mutable elements the same @elemref["mutable-element"]{remark} applies as for procedure
+ @nbr[queue-copy].}
+
+@defproc[(queue-map (‹queue› queue?) (‹function› (-> any/c any/c))) queue?]{
+ Like @nbr[map], but applying to queues.
+ Mutation of the returned queue does not affect the original and reversely.
+ If the @nbr[‹function›] takes constant time,
+ then procedure @nbr[queue-map] takes time proportional to the length of the @nbr[‹queue›].
+ For mutable elements the same @elemref["mutable-element"]{remark} applies as for procedure
+ @nbr[queue-copy].}
 
 @defproc[(in-queue (‹queue› queue?)) sequence?]{
  Queues have this procedure as @nbrl[prop:sequence]{sequence property}.
@@ -174,179 +361,6 @@ The procedures are described in order of their names.
  (code:comment " ")
  (for/list ((a (in-queue! q)) (b (in-queue! q))) (list a b))
  (queue-length q)]}
-
-@defproc[(list->queue (‹lst› list?)) queue?]{
- Same as @nbr[(apply make-queue ‹lst›)].
- Time proportional to the length of the @nbr[‹lst›].}
-
-@defproc[(make-queue (‹obj› any/c) ...) queue?]{
- Makes a queue containing the @nbr[‹obj›]s in order
- with the left-most one as the first element
- and the right-most one the last element.
- If no @nbr[‹obj›] is given, the returned queue is empty.@(lb)
- Time proportional to the number of @nbr[‹obj›]s
- because the list of @nbr[‹obj›]s is transformed to a mutable list.}
-
-@defproc[(queue->list (‹queue› queue?)) list?]{
- Returns a list of the elements of the @nbr[‹queue›] in order from first to last.
- Time proportional to the @nbrl[queue-length]{length} of the @nbr[‹queue›]
- because it implies conversion of a mutable list to an immutable one.
- @ignore{See procedure @nbr[queue->mlist] too.}
-
- @Interaction[
- (queue->list (make-queue 1 2 3 4 5))]}
-
-@defproc[(queue-clear! (‹queue› queue?)) void?]{
- Empties the @nbr[‹queue›]. Fixed time.}
-
-@defproc[(queue-copy (‹queue› queue?)) queue?]{
- Returns a copy of the @nbr[‹queue›].
- Mutation of the copy does not affect the original and reversely.
- Time proportional to the length of the @nbr[‹queue›].
-
- @Interaction[
- (define q (make-queue 'a 'b 'c 'd))
- (define c (queue-copy q))
- (queue-remove! q 2)
- (queue-remove! c 3)
- (queue-print-content #t)
- q
- c
- ]
-
-The elements in the copy are the same as in the original in the sence of @nbr[eq?].
-Therefore, mutation of a mutable element of the @nbr[‹queue›] affects both
-the original and the copy:
-
-@Interaction[
- (define b (box 'aap))
- (define q (make-queue b))
- (define c (queue-copy q))
- (set-box! b 'noot)
- (queue-get! q)
- (queue-get! c)]}
-
-@defproc[(queue-empty? (‹queue› queue?)) boolean?]{Constant time.}
-
-@defproc[(queue-filter (‹queue› queue?) (‹pred› (-> any/c any/c))) queue?]{
- Like @nbr[filter], but applying to queues.
- Mutation of the returned queue does not affect the original and reversely.
- If the @nbr[‹pred›] takes constant time,
- then procedure @nbr[queue-filter] takes time proportional to the length of the @nbr[‹queue›].}
-
-@defproc*[(((queue-get! (‹queue› queue?)) any/c)
-           ((queue-get! (‹queue› queue?)
-              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
- Returns the first element of the @nbr[‹queue›] and removes it.
- Constant time.@(lb)
- If the @nbr[‹queue›] is empty, the result depends on @nbr[‹escape›].@(lb)
- @(hspace 2)If it is not present, an exception is raised.@(lb)
- @(hspace 2)If it is a procedure whose arity includes 0,
- this procedure is called at tail position.@(lb)
- @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
- @(hspace 2)Else an exception is raised.
-
- @Interaction*[
- (queue-get! (make-queue 'a))
- (define empty-queue (make-queue))
- (queue-get! empty-queue #f)
- (queue-get! empty-queue (λ () (displayln "empty queue")))
- (queue-get! empty-queue)]
-
- An escape procedure not including arity 0 yields an exception,@(lb)
- but the arity is checked only if the queue is empty:
-
- @Interaction*[
- (queue-get! (make-queue 'a) (λ (x) x))
- (queue-get! empty-queue (λ (x) x))]
-
- A removed element becomes garbage collectable if no longer accessible otherwise:
-
- @Interaction[
- (define b (make-weak-box (list 'aap)))
- (define q (make-queue (weak-box-value b)))
- (queue-get! q)
- (collect-garbage)
- (weak-box-value b)]}
-
-@defproc[(queue-length (‹queue› queue?)) natural?]{
- Returns the number of elements currently in the @nbr[‹queue›]. Constant time.}
-
-@defproc[(queue-map (‹queue› queue?) (‹function› (-> any/c any/c))) queue?]{
- Like @nbr[map], but applying to queues.
- Mutation of the returned queue does not affect the original and reversely.
- If the @nbr[‹function›] takes constant time,
- then procedure @nbr[queue-map] takes time proportional to the length of the @nbr[‹queue›].}
-
-@defproc*[(((queue-peek (‹queue› queue?)) any/c)
-           ((queue-peek (‹queue› queue?)
-              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
- Returns the first element of the @nbr[‹queue›] without removing it.
- Constant time.@(lb)
- If the @nbr[‹queue›] is empty, the result depends on @nbr[‹escape›].@(lb)
- @(hspace 2)If it is not present, an exception is raised.@(lb)
- @(hspace 2)If it is a procedure whose arity includes 0,
- this procedure is called at tail position.@(lb)
- @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
- @(hspace 2)Else an exception is raised.}
-
-@defparam*[queue-print-content ‹yes/no› any/c boolean? #:value #f]{
- If @nbr[‹yes/no›] is anything else than @nbr[#f],
- the parameter is set to @nbr[#t].
- Queues are opaque objects, but parameter @nbr[queue-print-content]
- can be used to choose the way a queue is printed.
- If the parameter is false, a queue is printed as
- @inset{@nb{@tt{#<queue:@itt{‹length›>}}}}
- else as
- @inset{@nb{@tt{#<queue:@itt{‹length›}:@(string #\{)@itt{‹element›} ...@(string #\})>}}}
-
- @Interaction[
- (define q (make-queue 'a 'b 'c))
- (parameterize ((queue-print-content #f)) (writeln q))
- (parameterize ((queue-print-content #t)) (writeln q))]}
-
-@defproc[(queue-put! (‹queue› queue?) (‹obj› any/c)) void?]{
- Adds the @nbr[‹obj›] as the last one in the @nbr[‹queue›].
- Constant time.
-
- @Interaction[
- (define q (make-queue 'a 'b 'c))
- (queue-put! q 'aap)
- (queue->list q)]}
-
-@defproc[(queue-put!* (‹queue› queue?) (‹obj› any/c) ...) void?]{
- Adds the @nbr[‹obj›]s as the last ones in the @nbr[‹queue›].
- The right-most @nbr[‹obj›] will be the last element.
- Time proportional to the number of @nbr[‹obj›]s.
- The time does not depend on the current @nbrl[queue-length]{length} of the @nbr[‹queue›].
-
- @Interaction[
- (define q (make-queue))
- (queue-put!* q 'a 'b 'c)
- (queue->list q)]}
-
-@defproc*[(((queue-ref (‹queue› queue?) (‹n› natural?)) any/c)
-           ((queue-ref (‹queue› queue?) (‹n› natural?)
-              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
- Returns the @nbr[‹n›]@superscript{th} element of the @nbr[‹queue›]
- without removing it.
- Time proportional to @nbr[‹n›].@(lb)
- Elements are indexed from 0 up to but not including the length of the queue.@(lb)
- If the @nbr[‹queue›] has less than @nbr[(add1 ‹n›)] elements,
- the result depends on @nbr[‹escape›].@(lb)
- @(hspace 2)If it is not present, an exception is raised.@(lb)
- @(hspace 2)If it is a procedure whose arity includes 0,
- this procedure is called at tail position.@(lb)
- @(hspace 2)If it is a not a procedure, @nbr[‹escape›] is returned.@(lb)
- @(hspace 2)Else an exception is raised.}
-
-@defproc*[(((queue-remove! (‹queue› queue?) (‹n› natural?)) any/c)
-           ((queue-remove! (‹queue› queue?) (‹n› natural?)
-              (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
- Like @nbr[queue-ref], but also removes the referenced element from the @nbr[‹queue›].@(lb)
- Time proportional to @nbr[‹n›].}
-
-@defproc[(queue? (‹obj› any/c)) boolean?]{Constant time.}
 
 @ignore{@defproc[(queue->mlist (‹queue› queue?)) mlist?]{
   Returns a mutable list of the elements of the @nbr[‹queue›] in order from first to last.

@@ -22,7 +22,9 @@ Make this documentation with file manual.scrbl.
   queue-length
   queue-map
   queue-peek
+  queue-pop!
   queue-print-content
+  queue-push!
   queue-put!
   queue-put!*
   queue-ref
@@ -264,6 +266,15 @@ Make this documentation with file manual.scrbl.
 (define (queue-put!* q . elements)
   (check-queue-arg 'queue-put!* q)
   (for ((e (in-list elements))) (q-put! q e)))
+
+(define (queue-push! q e)
+  (check-queue-arg 'queue-push! q)
+  (define mlist (queue-mlist q))
+  (define new-mlist (mcons e mlist))
+  (set-queue-mlist! q new-mlist)
+  (when (null? mlist) (set-queue-pointer! q new-mlist)))
+
+(define queue-pop! queue-get!)
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
