@@ -211,7 +211,8 @@ A procedure whose name ends with an exclamation mark mutates a queue.
            ((queue-remove! (‹queue› queue?) (‹n› natural?)
               (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
  Like @nbr[queue-ref], but also removes the referenced element from the @nbr[‹queue›].@(lb)
- Time proportional to @nbr[‹n›].}
+ Time proportional to @nbr[‹n›].
+ @nbr[(queue-remove! ‹queue› 0)] does the same as @nbr[(queue-get! ‹queue›)].}
 
 @defproc[(queue-push! (‹queue› queue?) (‹obj› any/c)) void?]{
  Adds the @nbr[‹obj›] as the first one to the @nbr[‹queue›].
