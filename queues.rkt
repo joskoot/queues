@@ -68,7 +68,10 @@ Make this documentation with file manual.scrbl.
     ((procedure? escape)
      (cond
        ((procedure-arity-includes? escape 0) (escape))
-       (else (raise-argument-error who "(procedure-arity-includes/c 0)" escape))))
+       (else
+         (error who
+           "contract violation~n required: (procedure-arity-includes/c 0)~n given: ~s~n arity: ~s"
+           escape (procedure-arity escape)))))
     (else escape)))
 
 (define (index-out-of-range escape who index length)
