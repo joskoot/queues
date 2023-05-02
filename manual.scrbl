@@ -220,15 +220,17 @@ A procedure whose name ends with an exclamation mark mutates a queue.
  id est, a last in first out memory.
  Constant time.
 
-@Interaction[
- (define q (make-queue))
- (for ((e (in-list '(a b c)))) (queue-push! q e))
- (queue-print-content #t)
- q
- (let loop ()
-   (unless (queue-empty? q)
-     (writeln (queue-pop! q))
-     (loop)))]}
+ @Interaction[
+ (define-syntax-rule
+   (until condition body ...)
+   (do () (condition) body ...))
+ (define stack (make-queue))
+ (define queue (make-queue))
+ (for ((e (in-list '(a b c))))
+   (queue-push! stack e) (queue-put! queue e))
+ (code:comment "Compare stack with queue.")
+ (until (queue-empty? stack) (writeln (queue-pop! stack)))
+ (until (queue-empty? queue) (writeln (queue-get! queue)))]}
 
 @defproc*[(((queue-pop! (‹queue› queue?)) any/c)
            ((queue-pop! (‹queue› queue?)
