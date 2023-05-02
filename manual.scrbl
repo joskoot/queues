@@ -218,7 +218,17 @@ A procedure whose name ends with an exclamation mark mutates a queue.
  Adds the @nbr[‹obj›] as the first one to the @nbr[‹queue›].
  Can be used together with @nbr[queue-pop!] to use the @nbr[‹queue›] like @nb{a stack},
  id est, a last in first out memory.
- Constant time.}
+ Constant time.
+
+@Interaction[
+ (define q (make-queue))
+ (for ((e (in-list '(a b c)))) (queue-push! q e))
+ (queue-print-content #t)
+ q
+ (let loop ()
+   (unless (queue-empty? q)
+     (writeln (queue-pop! q))
+     (loop)))]}
 
 @defproc*[(((queue-pop! (‹queue› queue?)) any/c)
            ((queue-pop! (‹queue› queue?)
