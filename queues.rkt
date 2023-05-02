@@ -275,6 +275,7 @@ Make this documentation with file manual.scrbl.
   (define mlist (queue-mlist q))
   (define new-mlist (mcons e mlist))
   (set-queue-mlist! q new-mlist)
+  (set-queue-length! q (add1 (queue-length q)))
   (when (null? mlist) (set-queue-pointer! q new-mlist)))
 
 (define queue-pop! queue-get!)
