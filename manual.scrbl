@@ -216,14 +216,16 @@ A procedure whose name ends with an exclamation mark mutates a queue.
 
 @defproc[(queue-push! (‹queue› queue?) (‹obj› any/c)) void?]{
  Adds the @nbr[‹obj›] as the first one to the @nbr[‹queue›].
- Can be used together with @nbr[queue-pop!] to use the @nbr[‹queue›] @nb{like a stack}.
+ Can be used together with @nbr[queue-pop!] to use the @nbr[‹queue›] like @nb{a stack},
+ id est, a last in first out memory.
  Constant time.}
 
 @defproc*[(((queue-pop! (‹queue› queue?)) any/c)
            ((queue-pop! (‹queue› queue?)
               (‹escape› (or/c (not/c procedure?) (procedure-arity-includes/c 0)))) any/c))]{
  Same as @nbr[queue-get!].
- Can be used together with @nbr[queue-push!] to use the @nbr[‹queue›] @nb{like a stack}.}
+ Can be used together with @nbr[queue-push!] to use the @nbr[‹queue›] like @nb{a stack}
+ id est, a last in first out memory.}
 
 @defproc[(list->queue (‹lst› list?)) queue?]{
  Same as @nbr[(apply make-queue ‹lst›)].
