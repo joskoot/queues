@@ -137,6 +137,8 @@ A procedure whose name ends with an exclamation mark mutates a queue.
 @defproc[(queue-put!* (‹queue› queue?) (‹obj› any/c) ...) void?]{
  Adds the @nbr[‹obj›]s as the last ones to the @nbr[‹queue›].
  The right-most @nbr[‹obj›] will be the last element.
+ Same as
+ @inset{@nbr[(for ((e (in-list (list ‹obj› ...)))) (queue-put! ‹queue› e))]}
  Time proportional to the number of @nbr[‹obj›]s.
  The time does not depend on the current @nbrl[queue-length]{length} of the @nbr[‹queue›].
 
